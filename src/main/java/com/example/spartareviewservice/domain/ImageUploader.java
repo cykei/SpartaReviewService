@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @Component
 public class ImageUploader {
-    private static final String LOCATION_PATH = "./images";
+    private static final String LOCATION_PATH = "C:\\Users\\cykei\\source";
 
     @SneakyThrows
     public String uploadImage(MultipartFile image){

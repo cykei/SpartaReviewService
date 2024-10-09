@@ -20,7 +20,7 @@ public class ReviewController {
     }
 
     @PostMapping("{productId}/reviews")
-    public void createReview(@PathVariable int productId, @RequestBody ReviewRequest reviewRequest, MultipartFile image) {
+    public void createReview(@PathVariable int productId, @RequestPart ReviewRequest reviewRequest, @RequestPart(required = false) MultipartFile image) {
         reviewService.createReview(productId, reviewRequest, image);
     }
 }
