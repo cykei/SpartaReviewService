@@ -32,7 +32,7 @@ public class Review {
         return score;
     }
 
-    public static Review fromEntity(ReviewRequest reviewRequest, long productId) {
+    public static Review from(ReviewRequest reviewRequest, long productId) {
         return new Review(
                 productId,
                 reviewRequest.getUserId(),

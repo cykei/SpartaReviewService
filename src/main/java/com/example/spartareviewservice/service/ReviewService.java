@@ -3,7 +3,9 @@ package com.example.spartareviewservice.service;
 import com.example.spartareviewservice.controller.dto.ProductReviewResponse;
 import com.example.spartareviewservice.controller.dto.ReviewRequest;
 import com.example.spartareviewservice.domain.ImageUploader;
+import com.example.spartareviewservice.domain.Product;
 import com.example.spartareviewservice.domain.Review;
+import com.example.spartareviewservice.repository.ProductRepository;
 import com.example.spartareviewservice.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,19 +22,18 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewRepository reviewRepository;
+    private final ProductRepository productRepository;
     private final ImageUploader imageUploader;
 
     @Transactional(readOnly = true)
-    public ProductReviewResponse getProductsReview(int productId, long cursor, Pageable page) {
+    public ProductReviewResponse getProductsReview(long productId, long cursor, Pageable page) {
         // 1. 상품Id 에 해당하는 리뷰를 모두 가져온다.
-        List<Review> reviews = reviewRepository.findReviewByProductIdAndIdLessThanOrderByCreatedAtDesc(productId, cursor, page);
+        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        List<Review> reviews = reviewRepository.findReviewByProductIdAndIdLessThanOrderByCreatedAtDescIdDesc(productId, cursor, page);
 
         // 2. 평균점수를 구한다.
-        long totalCount = reviews.size();
-        long totalScore = reviews.stream()
-                .mapToInt(Review::getScore)
-                .sum();
-        double avgScore = (double) totalCount / (double) totalScore;
+        long totalCount = product.getReviewCount();
+        double avgScore = product.getScore();
 
         // 3. 조합해서 response 를 만든다
         return new ProductReviewResponse(
@@ -44,16 +45,24 @@ public class ReviewService {
     }
 
     @Transactional
-    public void createReview(int productId, ReviewRequest reviewRequest , MultipartFile image) {
-        // 1. 상품에대해 리뷰를 이미 남긴적 있는지 확인 -> 인덱스로 처리합니다.
-        Review review = Review.fromEntity(reviewRequest, productId);
+    public void createReview(long productId, ReviewRequest reviewRequest , MultipartFile image) {
+        // 1. 상품이 있는지 확인
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+
+
+        // 2. 상품에대해 리뷰를 이미 남긴적 있는지 확인 -> 인덱스로 처리합니다.
+        Review review = Review.from(reviewRequest, productId);
         try {
             review = reviewRepository.save(review);
         } catch (DataIntegrityViolationException error) {
           throw new IllegalArgumentException("상품에 대한 리뷰는 한가지만 남기실 수 있습니다.");
         }
 
-        // 2. 이미지 등록
+        // 3. 상품정보 업데이트
+        product.updateReview(review);
+
+        // 4. 이미지 등록
         if (!Objects.isNull(image)) {
             String imageUrl = imageUploader.uploadImage(image);
             review.setImageUrl(imageUrl);

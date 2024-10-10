@@ -9,5 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-   List<Review> findReviewByProductIdAndIdLessThanOrderByCreatedAtDesc(int productId, long cursor, Pageable pageable);
+   List<Review> findReviewByProductIdAndIdLessThanOrderByCreatedAtDescIdDesc(long productId, long cursor, Pageable pageable);
+
 }

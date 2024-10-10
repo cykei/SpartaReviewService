@@ -15,12 +15,12 @@ public class ReviewController {
     final private ReviewService reviewService;
 
     @GetMapping("{productId}/reviews")
-    public ProductReviewResponse getProductsReview(@PathVariable int productId, @RequestParam long cursor, @RequestParam(defaultValue = "10") int size) {
+    public ProductReviewResponse getProductsReview(@PathVariable long productId, @RequestParam long cursor, @RequestParam(defaultValue = "10") int size) {
         return reviewService.getProductsReview(productId, cursor, PageRequest.ofSize(size));
     }
 
     @PostMapping("{productId}/reviews")
-    public void createReview(@PathVariable int productId, @RequestPart ReviewRequest reviewRequest, @RequestPart(required = false) MultipartFile image) {
+    public void createReview(@PathVariable long productId, @RequestPart ReviewRequest reviewRequest, @RequestPart(required = false) MultipartFile image) {
         reviewService.createReview(productId, reviewRequest, image);
     }
 }
