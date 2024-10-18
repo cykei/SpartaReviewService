@@ -14,19 +14,19 @@ public class ProductReviewResponse {
     private long cursor;
     private List<ReviewResponse> reviews;
 
-    private void setReviews(List<Review> reviews) {
+    public ProductReviewResponse(long totalCount, double score, long cursor, List<Review> reviews) {
+        this.totalCount = totalCount;
+        this.score = score;
+        this.cursor = cursor;
+        this.reviews = toReviews(reviews);
+    }
+
+    private List<ReviewResponse> toReviews(List<Review> reviews) {
         List<ReviewResponse> reviewResponses = new ArrayList<>(
                 reviews.stream()
                         .map(it -> new ReviewResponse(it.getId(), it.getUserId(), it.getScore(), it.getContent(), it.getImageUrl(), it.getCreatedAt()))
                         .collect(Collectors.toList())
         );
-        this.reviews = reviewResponses;
-    }
-
-    public ProductReviewResponse(long totalCount, double score, long cursor, List<Review> reviews) {
-        this.totalCount = totalCount;
-        this.score = score;
-        this.cursor = cursor;
-        setReviews(reviews);
+        return reviewResponses;
     }
 }

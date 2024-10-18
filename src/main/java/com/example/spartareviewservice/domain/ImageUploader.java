@@ -18,8 +18,7 @@ public class ImageUploader {
         makeRootDirectory();
         String contentType = image.getContentType();
         if (!ObjectUtils.isEmpty(contentType) &&
-                (contentType.contains("image/jpeg") ||
-                        contentType.contains("image/png"))) {
+                (contentType.contains("image/jpeg") || contentType.contains("image/png"))) {
             File file = new File(LOCATION_PATH, Objects.requireNonNull(image.getOriginalFilename()));
             image.transferTo(file);
 
